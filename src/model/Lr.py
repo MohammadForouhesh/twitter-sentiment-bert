@@ -1,4 +1,3 @@
-from src.params import device
 from torch import nn
 import torch.nn
 
