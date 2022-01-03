@@ -5,3 +5,5 @@ MNIST/raw/t10k-labels-idx1-ubyte
 MNIST/raw/train-images-idx3-ubyte
 MNIST/raw/train-labels-idx1-ubyte
 *.csv
+src/running/__pycache__/Train.cpython-39.pyc
+*.pyc
