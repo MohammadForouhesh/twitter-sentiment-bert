@@ -1,14 +1,14 @@
 from src.metrics.Metrics import time_per_epoch
 from src.running.Evaluation import evaluate
 from src.running.Train import train
+from src.params import N_EPOCH
 import torch
 import time
-from src.params import N_EPOCH
 
 best_validation_loss = float('inf')
 
 
-def run(model, iterator, optimizer, loss_function, n_epoch=N_EPOCH, if_lstm=False):
+def run(model, iterator, optimizer, loss_function, n_epoch, if_lstm=False):
     
     global best_validation_loss
     for epoch in range(n_epoch):
