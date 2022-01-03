@@ -1,5 +1,5 @@
-import torch
 from sentence_transformers import SentenceTransformer
+import torch
 
 N_EPOCH = 10
 print(torch.__version__)
