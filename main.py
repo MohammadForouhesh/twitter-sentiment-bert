@@ -1,19 +1,17 @@
-import numpy as np
-
-from src.model.Lr import LinearRegression
 from src.preprocessing.Preprocessing import correction, preprocess, remove_redundent_characters
-from sentence_transformers import SentenceTransformer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset
+from src.model.Lr import LinearRegression
+from src.params import device, emb_model
 from torch.utils.data import DataLoader
 from src.metrics import ir_metrics
 from src.model import LSTM, CNN
 from src.running.Run import run
-from src.params import device, emb_model
 from termcolor import colored
 from datetime import datetime
 from torch import nn
 import pandas as pd
+import numpy as np
 import argparse
 import warnings
 import logging
@@ -70,7 +68,7 @@ def main(args):
     loss_function = loss_function.to(device)
 
     print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
-          colored('\n====================TRAIN=' + args.model_name + '=====================', 'red'))
+          colored('\n====================TRAIN=' + args.model_name.upper() + '=====================', 'red'))
     if args.model_name == 'lstm':
         model = LSTM(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
     
@@ -80,18 +78,18 @@ def main(args):
                             loss_function=loss_function, n_epoch=args.epoch, if_lstm=True)
 
     elif args.model_name == 'cnn':
-        model = CNN(input_size=len(X_train[0]), output_dim=len(set(y_train))).to(device)
+        model = CNN(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
         optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True)
     
         trained_model = run(model=model, iterator=train_dl, optimizer=optimizer,
-                            loss_function=loss_function)
+                            loss_function=loss_function, n_epoch=args.epoch)
 
     elif args.model_name == 'lr':
         model = LinearRegression(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
         optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True)
 
         trained_model = run(model=model, iterator=train_dl, optimizer=optimizer,
-                            loss_function=loss_function)
+                            loss_function=loss_function, n_epoch=args.epoch)
 
     ir_metrics(model=trained_model, iterator=train_dl)
 
@@ -111,7 +109,7 @@ if __name__ == '__main__':
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=40,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=100,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/EmotionTest.csv',
                         help="address to test dataset.")
