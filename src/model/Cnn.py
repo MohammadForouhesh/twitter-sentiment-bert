@@ -11,7 +11,7 @@ trick_f = lambda tensor: tensor.permute(1, 0)\
 
 
 class CNN(nn.Module):
-    def __init__(self, input_size=384, embedding_dim=100, n_filters=384,
+    def __init__(self, embedding_dim=100, n_filters=384,
                  filter_sizes=[2, 3, 4], output_dim=42, drop_out=0.5, pad_idx=2):
         super().__init__()
         self.convs = nn.ModuleList([
