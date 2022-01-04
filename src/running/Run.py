@@ -19,7 +19,7 @@ def run(model, iterator, optimizer, loss_function, n_epoch, if_lstm=False):
 
         if valid_loss < best_validation_loss:
             best_validation_loss = valid_loss
-            torch.save(model.state_dict(), 'models/exa_emotion_classification.pt')
+            torch.save(model.state_dict(), f'models/sentiment_{model.__class__.__name__}.pt')
 
         if (epoch + 1) % 10 != 0: continue
 
