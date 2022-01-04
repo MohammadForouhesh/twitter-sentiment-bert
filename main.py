@@ -25,19 +25,17 @@ warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 def preparation(args) -> (np.ndarray, np.ndarray):
     train_df = pd.read_csv(args.train_path)
+    text = train_df.full_text
+    label = train_df.label.apply(lambda item: item + 1)
     if args.augment:
-        text = train_df.full_text.apply(preprocess)
-        label = train_df.label.apply(lambda item: item + 1)
-        text2 = pd.concat([text.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text], ignore_index=True)
-        label2 = pd.concat([label, label], ignore_index=True)
-
-        raw_text = train_df.full_text.apply(remove_redundent_characters)
+        text1 = text.apply(preprocess)
+        text2 = pd.concat([text1.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text], ignore_index=True)
+        raw_text = text.apply(remove_redundent_characters)
 
         text3 = pd.concat([raw_text, text2], ignore_index=True)
-        label3 = pd.concat([label2, label], ignore_index=True)
 
         text = pd.concat([raw_text.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text3], ignore_index=True)
-        label = pd.concat([label3, label], ignore_index=True)
+        label = pd.concat([label, label, label, label], ignore_index=True)
 
     train = np.array(text.apply(emb_model.encode))
 
