@@ -4,18 +4,25 @@ import torch.nn
 
 
 class LSTM(nn.Module):
-    def __init__(self, input_size=384, hidden_layer_size=150, output_size=10):
+    def __init__(self, input_size, hidden_layer_size=150, output_size=10, bidirectional=False, n_layers=10, dropout=0.5):
         super().__init__()
         self.hidden_layer_size = hidden_layer_size
 
-        self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=1)
-        self.linear = nn.Linear(hidden_layer_size, output_size)
+        self.lstm = nn.LSTM(input_size, hidden_layer_size, num_layers=1,
+                            bidirectional=bidirectional, batch_first=True,
+                            dropout=0 if n_layers < 2 else dropout)
 
         self.hidden_cell = (torch.rand(1, 1, self.hidden_layer_size).to(device),
                             torch.rand(1, 1, self.hidden_layer_size).to(device))
 
-    def forward(self, input_seq):
-        lstm_out, self.hidden_cell = self.lstm(input_seq.view(len(input_seq), 1, -1), self.hidden_cell)
-        predictions = self.linear(lstm_out.view(len(input_seq), -1))
+        self.linear = nn.Linear(hidden_layer_size * 2 if bidirectional else hidden_layer_size, output_size)
+        self.dropout = nn.Dropout(dropout)
 
-        return predictions
+    def forward(self, vector):
+        _, hidden = self.lstm(vector.view(len(vector), 1, -1))
+        if self.lstm.bidirectional:
+            hidden = self.dropout(torch.cat((hidden[-2::], hidden[-1::]), dim=1))
+        else:
+            hidden = self.dropout(hidden[0][-1::])
+        prediction = self.linear(hidden.view(len(vector), -1))
+        return prediction
