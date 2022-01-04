@@ -23,11 +23,10 @@ gc.enable()
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
-def preparation(args) -> (np.ndarray, np.ndarray):
-    train_df = pd.read_csv(args.train_path)
-    text = train_df.full_text
-    label = train_df.label.apply(lambda item: item + 1)
-    if args.augment:
+def preparation(dataframe, augment=False) -> (np.ndarray, np.ndarray):
+    text = dataframe.full_text
+    label = dataframe.label.apply(lambda item: item + 1)
+    if augment:
         text1 = text.apply(preprocess)
         text2 = pd.concat([text1.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text], ignore_index=True)
         raw_text = text.apply(remove_redundent_characters)
@@ -37,15 +36,17 @@ def preparation(args) -> (np.ndarray, np.ndarray):
         text = pd.concat([raw_text.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text3], ignore_index=True)
         label = pd.concat([label, label, label, label], ignore_index=True)
 
-    train = np.array(text.apply(emb_model.encode))
+    train = list(text.apply(emb_model.encode))
 
     return train, label
 
 
 def main(args):
-    train, test = preparation(args)
+    df = pd.read_csv(args.train_path)
+    train_df, test_df = train_test_split(df, test_size=0.2, stratify=list(df.label))
+    X_train, y_train = preparation(train_df, augment=False)#args.augment)
+    X_test, y_test = preparation(test_df, augment=False)
 
-    X_train, X_test, y_train, y_test = train_test_split(list(train), list(test), test_size=0.2, stratify=list(test))
     inputs = torch.from_numpy(np.array(X_train)).to(device)
     if device == 'cuda':    target = torch.cuda.LongTensor(y_train)
     else:                   target = torch.LongTensor(y_train)
@@ -95,7 +96,7 @@ def main(args):
           colored('\n====================Test==' + args.model_name + '=====================', 'red'))
 
     ir_metrics(model=trained_model, iterator=test_dl)
-        
+
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Neural Architectures')
@@ -103,11 +104,11 @@ if __name__ == '__main__':
                         help='Raw dataset file address.')
     parser.add_argument('--augment', dest='augment', type=bool, default=True,
                         help='augment the dataset to learn better.')
-    parser.add_argument('--model_name', dest='model_name', type=str, default='cnn',
+    parser.add_argument('--model_name', dest='model_name', type=str, default='lstm',
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=100,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=30,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/EmotionTest.csv',
                         help="address to test dataset.")
