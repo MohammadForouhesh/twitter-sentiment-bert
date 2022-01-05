@@ -4,7 +4,7 @@ import torch.nn
 
 
 class LSTM(nn.Module):
-    def __init__(self, input_size, hidden_layer_size=150, output_size=10, bidirectional=False, n_layers=10, dropout=0.5):
+    def __init__(self, input_size, hidden_layer_size=450, output_size=10, bidirectional=False, n_layers=100, dropout=0.5):
         super().__init__()
         self.hidden_layer_size = hidden_layer_size
 
