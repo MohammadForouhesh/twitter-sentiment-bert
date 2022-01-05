@@ -5,8 +5,8 @@ import torch
 
 
 class CNN(nn.Module):
-    def __init__(self, input_size, output_size, n_filters=100, filter_sizes=[1, 1, 1],
-                 dropout=0.5):
+    def __init__(self, input_size, output_size, n_filters=800, filter_sizes=[1, 1, 1, 1, 1],
+                 dropout=0.25):
         super().__init__()
         self.convs = nn.ModuleList([
                                     nn.Conv1d(in_channels=input_size,
