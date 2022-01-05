@@ -3,7 +3,7 @@ import torch
 
 N_EPOCH = 10
 print(torch.__version__)
-emb_model = SentenceTransformer('distilbert-base-multilingual-cased')
+emb_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print('Using {} device'.format(device))
 
