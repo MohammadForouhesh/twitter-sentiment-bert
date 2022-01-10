@@ -9,8 +9,8 @@ def train(model, iterator, optimizer, criterion, if_lstm=False):
     model.train()
     for seq, label in iterator:
         optimizer.zero_grad()
-        if if_lstm: model.hidden_cell = (torch.rand(1, 1, model.hidden_layer_size).to(device),
-                                         torch.rand(1, 1, model.hidden_layer_size).to(device))
+        if if_lstm: model.hidden_cell = (torch.rand(model.lstm.num_layers, seq.shape[0], model.hidden_layer_size).to(device),
+                                         torch.rand(model.lstm.num_layers, seq.shape[0], model.hidden_layer_size).to(device))
         preds = model(seq)
         loss = criterion(preds, label)
         acc = categorical_acc(preds, label)
