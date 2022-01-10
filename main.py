@@ -25,11 +25,11 @@ warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
 def preparation(dataframe, augment=False) -> (np.ndarray, np.ndarray):
-    text = dataframe.text
+    text = dataframe.text.apply(remove_redundent_characters)
     label = dataframe.sentiment.apply(lambda item: 1 if item >= 0 else 0)
     if augment:
         text1 = text.apply(preprocess)
-        text2 = pd.concat([text1.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text], ignore_index=True)
+        text2 = pd.concat([text1.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text1], ignore_index=True)
         raw_text = text.apply(remove_redundent_characters)
 
         text3 = pd.concat([raw_text, text2], ignore_index=True)
@@ -60,8 +60,8 @@ def main(args):
         return 0
 
     df = pd.read_csv(args.train_path)
-    train_df, test_df = train_test_split(df, test_size=0.2, stratify=list(df.sentiment))
-    train_df, eval_df = train_test_split(train_df, test_size=0.15, stratify=list(train_df.sentiment))
+    train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
+    train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
     X_train, y_train = preparation(train_df, augment=True)
     X_eval, y_eval = preparation(eval_df, augment=False)
     X_test, y_test = preparation(test_df, augment=False)
@@ -83,7 +83,7 @@ def main(args):
     else:                   target = torch.LongTensor(y_test)
     test_ds = TensorDataset(inputs, target)
 
-    batch_size = 5 if args.model_name == 'lstm' else 1
+    batch_size = 16 if args.model_name == 'lstm' else 1
 
     train_dl = DataLoader(train_ds, batch_size, shuffle=True)
     eval_dl = DataLoader(eval_ds, batch_size, shuffle=True)
@@ -100,7 +100,7 @@ def main(args):
         optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True)
     
         trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
-                            loss_function=loss_function, n_epoch=args.epoch, if_lstm=True)
+                            loss_function=loss_function, n_epoch=args.epoch)
 
     elif args.model_name == 'cnn':
         model = CNN(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=200,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=250,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.csv',
                         help="address to test dataset.")
