@@ -24,8 +24,8 @@ warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
 def preparation(dataframe, augment=False) -> (np.ndarray, np.ndarray):
-    text = dataframe.full_text
-    label = dataframe.label.apply(lambda item: item + 1)
+    text = dataframe.text
+    label = dataframe.sentiment.apply(lambda item: 1 if item >= 0 else 0)
     if augment:
         text1 = text.apply(preprocess)
         text2 = pd.concat([text1.apply(lambda sent: ' '.join(sent.split(' ')[::-1])), text], ignore_index=True)
@@ -43,8 +43,10 @@ def preparation(dataframe, augment=False) -> (np.ndarray, np.ndarray):
 
 def main(args):
     df = pd.read_csv(args.train_path)
-    train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.label))
+    train_df, test_df = train_test_split(df, test_size=0.2, stratify=list(df.sentiment))
+    train_df, eval_df = train_test_split(train_df, test_size=0.15, stratify=list(train_df.sentiment))
     X_train, y_train = preparation(train_df, augment=True)
+    X_eval, y_eval = preparation(eval_df, augment=True)
     X_test, y_test = preparation(test_df, augment=False)
 
     inputs = torch.from_numpy(np.array(X_train)).to(device)
@@ -52,6 +54,12 @@ def main(args):
     else:                   target = torch.LongTensor(y_train)
 
     train_ds = TensorDataset(inputs, target)
+
+    inputs = torch.from_numpy(np.array(X_eval)).to(device)
+    if device == 'cuda':    target = torch.cuda.LongTensor(y_eval)
+    else:                   target = torch.LongTensor(y_eval)
+
+    eval_ds = TensorDataset(inputs, target)
 
     inputs = torch.from_numpy(np.array(X_test)).to(device)
     if device == 'cuda':    target = torch.cuda.LongTensor(y_test)
@@ -61,6 +69,7 @@ def main(args):
     batch_size = 5 if args.model_name == 'lstm' else 1
 
     train_dl = DataLoader(train_ds, batch_size, shuffle=True)
+    eval_dl = DataLoader(eval_ds, batch_size, shuffle=True)
     test_dl = DataLoader(test_ds, batch_size, shuffle=True)
 
     loss_function = nn.CrossEntropyLoss()
@@ -73,21 +82,21 @@ def main(args):
     
         optimizer = torch.optim.AdamW(model.parameters(), amsgrad=False)
     
-        trained_model = run(model=model, iterator=train_dl, optimizer=optimizer,
+        trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
                             loss_function=loss_function, n_epoch=args.epoch, if_lstm=True)
 
     elif args.model_name == 'cnn':
         model = CNN(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
         optimizer = torch.optim.AdamW(model.parameters(), amsgrad=False)
     
-        trained_model = run(model=model, iterator=train_dl, optimizer=optimizer,
+        trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
                             loss_function=loss_function, n_epoch=args.epoch)
 
     elif args.model_name == 'lr':
         model = LinearRegression(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
         optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True)
 
-        trained_model = run(model=model, iterator=train_dl, optimizer=optimizer,
+        trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
                             loss_function=loss_function, n_epoch=args.epoch)
 
     ir_metrics(model=trained_model, iterator=train_dl)
@@ -100,7 +109,7 @@ def main(args):
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Neural Architectures')
-    parser.add_argument('--train_path', dest='train_path', type=str, default='dataset/bime_sample_new3.csv',
+    parser.add_argument('--train_path', dest='train_path', type=str, default='dataset/economics_sample-2.csv',
                         help='Raw dataset file address.')
     parser.add_argument('--augment', dest='augment', type=bool, default=True,
                         help='augment the dataset to learn better.')
@@ -108,7 +117,7 @@ if __name__ == '__main__':
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=100,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=150,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/EmotionTest.csv',
                         help="address to test dataset.")
