@@ -8,14 +8,14 @@ import time
 best_validation_loss = float('inf')
 
 
-def run(model, iterator, optimizer, loss_function, n_epoch, if_lstm=False):
+def run(model, train_iterator, eval_iterator, optimizer, loss_function, n_epoch, if_lstm=False):
     global best_validation_loss
     start_time = time.time()
 
     for epoch in range(n_epoch):
-        train_loss, train_acc = train(model, iterator, optimizer, criterion=loss_function, if_lstm=if_lstm)
+        train_loss, train_acc = train(model, train_iterator, optimizer, criterion=loss_function, if_lstm=if_lstm)
         
-        valid_loss, valid_acc = evaluate(model, iterator, criterion=loss_function)
+        valid_loss, valid_acc = evaluate(model, eval_iterator, criterion=loss_function)
 
         if valid_loss < best_validation_loss:
             best_validation_loss = valid_loss
