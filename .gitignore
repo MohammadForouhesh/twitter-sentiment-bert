@@ -9,3 +9,4 @@ src/running/__pycache__/Train.cpython-39.pyc
 *.pyc
 src/.DS_Store
 src/model/.DS_Store
+*.xlsx
