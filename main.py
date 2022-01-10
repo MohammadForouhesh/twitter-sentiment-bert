@@ -9,6 +9,7 @@ from src.model import LSTM, CNN
 from src.running.Run import run
 from termcolor import colored
 from datetime import datetime
+from tqdm import tqdm
 from torch import nn
 import pandas as pd
 import numpy as np
@@ -41,12 +42,28 @@ def preparation(dataframe, augment=False) -> (np.ndarray, np.ndarray):
     return list(train), list(label)
 
 
+def inference_model(model, sentence):
+    encoded = emb_model.encode([sentence], convert_to_tensor=True)
+    return int(model(encoded).argmax())
+
+
 def main(args):
+    if args.load is not None:
+        trained_model = LSTM(input_size=768, output_size=2).to(device)
+        trained_model.load_state_dict(torch.load(args.load))
+        trained_model.eval()
+        tqdm.pandas()
+        inference_set = pd.read_csv(args.test_path)
+        inference_set = inference_set.dropna()
+        inference_set['sentiment'] = inference_set.text.progress_apply(lambda item: inference_model(trained_model, item))
+        inference_set.to_csv('datasets_sentiment_lstm.csv')
+        return 0
+
     df = pd.read_csv(args.train_path)
     train_df, test_df = train_test_split(df, test_size=0.2, stratify=list(df.sentiment))
     train_df, eval_df = train_test_split(train_df, test_size=0.15, stratify=list(train_df.sentiment))
     X_train, y_train = preparation(train_df, augment=True)
-    X_eval, y_eval = preparation(eval_df, augment=True)
+    X_eval, y_eval = preparation(eval_df, augment=False)
     X_test, y_test = preparation(test_df, augment=False)
 
     inputs = torch.from_numpy(np.array(X_train)).to(device)
@@ -80,14 +97,14 @@ def main(args):
     if args.model_name == 'lstm':
         model = LSTM(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
     
-        optimizer = torch.optim.AdamW(model.parameters(), amsgrad=False)
+        optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True)
     
         trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
                             loss_function=loss_function, n_epoch=args.epoch, if_lstm=True)
 
     elif args.model_name == 'cnn':
         model = CNN(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
-        optimizer = torch.optim.AdamW(model.parameters(), amsgrad=False)
+        optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True)
     
         trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
                             loss_function=loss_function, n_epoch=args.epoch)
@@ -105,6 +122,9 @@ def main(args):
           colored('\n====================Test==' + args.model_name.upper() + '=====================', 'red'))
 
     ir_metrics(model=trained_model, iterator=test_dl)
+    inference_set = pd.read_csv(args.test_path)
+    inference_set['sentiment'] = inference_set.text.apply(lambda item: inference_model(trained_model, item))
+    inference_set.to_csv('datasets_sentiment_lstm.csv')
 
         
 if __name__ == '__main__':
@@ -117,10 +137,11 @@ if __name__ == '__main__':
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=150,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=200,
                         help="number of epochs in the training")
-    parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/EmotionTest.csv',
+    parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.csv',
                         help="address to test dataset.")
+    parser.add_argument('--load', dest='load', type=str, default=None)#'models/sentiment_LSTM.pt')
 
     args = parser.parse_args()
 
