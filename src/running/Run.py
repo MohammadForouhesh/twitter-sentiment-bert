@@ -21,7 +21,7 @@ def run(model, train_iterator, eval_iterator, optimizer, loss_function, n_epoch)
         if valid_loss < best_validation_loss:
             best_validation_loss = valid_loss
             torch.save(model.state_dict(), f'models/sentiment_{model.__class__.__name__}.pt')
-        if valid_acc > 0.8 and abs(valid_loss - train_loss) < 0.01: early_stop = True
+        if valid_acc > 0.8 and train_acc > 0.9: early_stop = True
         if (epoch + 1) % 10 != 0 and not early_stop: continue
 
         end_time = time.time()
