@@ -29,7 +29,7 @@ class LSTMMemoryGate(nn.Module):
 
 
 class LSTM(nn.Module):
-    def __init__(self, input_size, hidden_layer_size=100, output_size=10, bidirectional=True, n_layers=3, dropout=0.9):
+    def __init__(self, input_size, hidden_layer_size=300, output_size=10, bidirectional=True, n_layers=3, dropout=0.9):
         super().__init__()
         self.hidden_layer_size = hidden_layer_size
         self.num_layers = n_layers * (2 if bidirectional else 1)
