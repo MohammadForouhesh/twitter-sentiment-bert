@@ -45,8 +45,9 @@ def preparation(dataframe, augment=False) -> (np.ndarray, np.ndarray):
 def inference_model(model, sentence):
     encoded = emb_model.encode([sentence], convert_to_tensor=True)
     s, h = model(encoded)[0]
-    polarity = (h - s)/(abs(h) + abs(s))
-    return 'sad' if polarity < 0 else 'meh' if 0 < polarity < 0.3 else 'happy'
+    sigmoid = lambda x: 2/(1+np.e**(-x)) - 1 if x != 0 else 0
+    polarity = sigmoid(h - s)
+    return 'sad' if polarity < -0.2 else 'meh' if -0.2 <= polarity < 0.2 else 'happy'
 
 
 def main(args):
@@ -55,10 +56,10 @@ def main(args):
         trained_model.load_state_dict(torch.load(args.load))
         trained_model.eval()
         tqdm.pandas()
-        inference_set = pd.read_csv(args.test_path)
+        inference_set = pd.read_excel(args.test_path)
         inference_set = inference_set.dropna()
         inference_set['sentiment'] = inference_set.text.progress_apply(lambda item: inference_model(trained_model, item))
-        inference_set.to_csv('datasets_sentiment_lstm.csv')
+        inference_set.to_excel('datasets_polarity_lstm.xlsx')
         return 0
 
     df = pd.read_csv(args.train_path)
@@ -141,7 +142,7 @@ if __name__ == '__main__':
                         help="whether or not preprocessing the training set.")
     parser.add_argument('--epoch', dest='epoch', type=int, default=150,
                         help="number of epochs in the training")
-    parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.csv',
+    parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.xlsx',
                         help="address to test dataset.")
     parser.add_argument('--load', dest='load', type=str, default='models/sentiment_LSTM.pt')
 
