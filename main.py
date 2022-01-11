@@ -44,7 +44,9 @@ def preparation(dataframe, augment=False) -> (np.ndarray, np.ndarray):
 
 def inference_model(model, sentence):
     encoded = emb_model.encode([sentence], convert_to_tensor=True)
-    return int(model(encoded).argmax())
+    s, h = model(encoded)[0]
+    polarity = (h - s)/(abs(h) + abs(s))
+    return 'sad' if polarity < 0 else 'meh' if 0 < polarity < 0.3 else 'happy'
 
 
 def main(args):
@@ -62,7 +64,7 @@ def main(args):
     df = pd.read_csv(args.train_path)
     train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
     train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
-    X_train, y_train = preparation(train_df, augment=True)
+    X_train, y_train = preparation(train_df, augment=False)
     X_eval, y_eval = preparation(eval_df, augment=False)
     X_test, y_test = preparation(test_df, augment=False)
 
@@ -93,7 +95,7 @@ def main(args):
     loss_function = loss_function.to(device)
 
     print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
-          colored('\n====================TRAIN=' + args.model_name.upper() + '=====================', 'red'))
+          colored('\n===============TRAIN=' + args.model_name.upper() + '===============', 'red'))
     if args.model_name == 'lstm':
         model = LSTM(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
     
@@ -119,7 +121,7 @@ def main(args):
     ir_metrics(model=trained_model, iterator=train_dl)
 
     print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
-          colored('\n====================Test==' + args.model_name.upper() + '=====================', 'red'))
+          colored('\n===============Test==' + args.model_name.upper() + '===============', 'red'))
 
     ir_metrics(model=trained_model, iterator=test_dl)
     inference_set = pd.read_csv(args.test_path)
@@ -137,11 +139,11 @@ if __name__ == '__main__':
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=250,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=150,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.csv',
                         help="address to test dataset.")
-    parser.add_argument('--load', dest='load', type=str, default=None)#'models/sentiment_LSTM.pt')
+    parser.add_argument('--load', dest='load', type=str, default='models/sentiment_LSTM.pt')
 
     args = parser.parse_args()
 
