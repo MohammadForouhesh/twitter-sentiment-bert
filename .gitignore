@@ -9,3 +9,6 @@ src/running/__pycache__/Train.cpython-39.pyc
 src/.DS_Store
 src/model/.DS_Store
 *.xlsx
+.idea/Neural-Architectures-Torch.iml
+dataset/.DS_Store
+.DS_Store
