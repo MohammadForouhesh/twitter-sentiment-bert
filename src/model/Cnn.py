@@ -5,7 +5,7 @@ import torch
 
 
 class CNN(nn.Module):
-    def __init__(self, input_size, output_size, n_filters=300, filter_sizes=[1, 1, 1, 1, 1],
+    def __init__(self, input_size, output_size, n_filters=300, filter_sizes=[1, 2, 4, 8, 16],
                  dropout=0.85):
         super().__init__()
         self.convs = nn.ModuleList([
@@ -20,10 +20,11 @@ class CNN(nn.Module):
 
     def forward(self, text):
         embedded = text.unsqueeze(0)
-        embedded = embedded.permute(0, 2, 1)
+        embedded = embedded.permute(1, 2, 0)
         conved = [F.relu(conv(embedded)) for conv in self.convs]
         pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
 
         cat = self.dropout(torch.cat(pooled, dim=1))
         # cat = [batch size, n_filters * len(filter_sizes)]
-        return self.fc(cat)
+        predictions = self.fc(cat.view(len(text), -1))
+        return predictions
