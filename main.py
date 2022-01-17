@@ -1,3 +1,5 @@
+import pickle
+
 from src.preprocessing.Preprocessing import correction, preprocess, remove_redundent_characters
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -22,8 +24,8 @@ import torch
 import gc
 
 id2label = {0: 'sad', 1: 'meh', 2: 'happy'}
-label2id = {'sad': 0, 'meh': 1, 'happy': 2}
-
+# label2id = {'sad': 0, 'meh': 1, 'happy': 2}
+label2id = {'POSITIVE': 1, 'NEGATIVE': 0}
 gc.enable()
 warnings.filterwarnings("ignore", category=SyntaxWarning)
 
@@ -63,14 +65,37 @@ def main(args):
         inference_set['sentiment'] = inference_set.text.progress_apply(lambda item: inference(trained_model, item))
         inference_set.to_excel('datasets_polarity_lstm.xlsx')
         return 0
+    loading = True
+    if not loading:
+        df = pd.read_excel(args.train_path)
+        # negative_data = df[df['sentiment'] == 'sad']
+        # neutral_data = df[df['sentiment'] == 'meh']
+        # positive_data = df[df['sentiment'] == 'happy']
+        #
+        # cutting_point = min(len(negative_data), len(neutral_data), len(positive_data))
+        # print(cutting_point)
+        # if cutting_point <= len(negative_data):
+        #     negative_data = negative_data.sample(n=cutting_point).reset_index(drop=True)
+        #
+        # if cutting_point <= len(neutral_data):
+        #     neutral_data = neutral_data.sample(n=cutting_point).reset_index(drop=True)
+        #
+        # if cutting_point <= len(positive_data):
+        #     positive_data = positive_data.sample(n=cutting_point).reset_index(drop=True)
 
-    df = pd.read_excel(args.train_path)
-    train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
-    train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
+        # df = pd.concat([negative_data, neutral_data, positive_data])
+        train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
+        train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
 
-    X_train, y_train = preparation(train_df, augment=False)
-    X_eval, y_eval = preparation(eval_df, augment=False)
-    X_test, y_test = preparation(test_df, augment=False)
+        X_train, y_train = preparation(train_df, augment=False)
+        X_eval, y_eval = preparation(eval_df, augment=False)
+        X_test, y_test = preparation(test_df, augment=False)
+        data_pickle = [X_train, y_train, X_eval, y_eval, X_test, y_test]
+        with open('roberta.pkl', 'wb') as f:
+            pickle.dump(data_pickle, f, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        data_pickle = pickle.load(open('roberta.pkl', 'rb'))
+        X_train, y_train, X_eval, y_eval, X_test, y_test = data_pickle
 
     inputs = torch.from_numpy(np.array(X_train)).to(device)
     if device == 'cuda':    target = torch.cuda.LongTensor(y_train)
@@ -128,15 +153,15 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Neural Architectures')
-    parser.add_argument('--train_path', dest='train_path', type=str, default='dataset/sentiment-multilingual-approach.xlsx',
+    parser.add_argument('--train_path', dest='train_path', type=str, default='dataset/sentiment-RoBerta-finetuning.xlsx',
                         help='Raw dataset file address.')
     parser.add_argument('--augment', dest='augment', type=bool, default=True,
                         help='augment the dataset to learn better.')
-    parser.add_argument('--model_name', dest='model_name', type=str, default='cnn',
+    parser.add_argument('--model_name', dest='model_name', type=str, default='lstm',
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=180,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=500,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.xlsx',
                         help="address to test dataset.")
