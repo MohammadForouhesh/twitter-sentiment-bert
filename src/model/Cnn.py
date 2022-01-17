@@ -15,7 +15,7 @@ class CNN(nn.Module):
                                     for fs in filter_sizes
                                     ])
         self.fc = nn.Linear(len(filter_sizes) * n_filters, output_size)
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.FeatureAlphaDropout(p=dropout)
 
     def forward(self, text):
         embedded = text.unsqueeze(2)
@@ -39,7 +39,7 @@ class CNN2d(nn.Module):
                                     for fs in filter_sizes
                                     ])
         self.fc = nn.Linear(len(filter_sizes) * n_filters, output_size)
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.FeatureAlphaDropout(p=dropout)
 
     def forward(self, text):
         embedded = text.unsqueeze(2).unsqueeze(3).expand(-1, -1, 32, 32)
