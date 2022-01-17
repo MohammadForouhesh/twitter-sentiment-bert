@@ -26,7 +26,7 @@ def run(model, train_iterator, eval_iterator, optimizer, loss_function, n_epoch)
 
         end_time = time.time()
         epoch_mins, epoch_secs = time_per_epoch(start_time, end_time)
-        print(f'Epoch {epoch + 1}, Time: {epoch_mins} mins: {epoch_secs} secs')
+        print(f'\n Epoch {epoch + 1}, Time: {epoch_mins} mins: {epoch_secs} secs')
         print(f'\t Train Loss {train_loss:.3f}, Train Acc {train_acc * 100:.3f}')
         print(f'\t Valid Loss {valid_loss:.3f}, Valid Acc {valid_acc * 100:.3f}')
         start_time = time.time()
