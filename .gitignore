@@ -13,3 +13,4 @@ src/model/.DS_Store
 dataset/.DS_Store
 .DS_Store
 *.pt
+*.pkl
