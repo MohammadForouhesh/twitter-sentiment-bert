@@ -23,7 +23,7 @@ def ir_metrics(model, iterator):
 def categorical_acc(preds, label):
     max_preds = preds.argmax(dim=1, keepdim=True)
     correct = max_preds.squeeze(1).eq(label)
-    return correct.sum() / torch.FloatTensor([label.shape[0]])
+    return correct.sum() / torch.cuda.FloatTensor([label.shape[0]])
 
 
 def time_per_epoch(st, et):
