@@ -12,3 +12,4 @@ src/model/.DS_Store
 .idea/Neural-Architectures-Torch.iml
 dataset/.DS_Store
 .DS_Store
+*.pt
