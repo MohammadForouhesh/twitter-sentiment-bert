@@ -5,8 +5,8 @@ import torch
 
 
 class CNN(nn.Module):
-    def __init__(self, input_size, output_size, n_filters=50, filter_sizes=(1, 2, 2),
-                 dropout=0.5):
+    def __init__(self, input_size, output_size, n_filters=100, filter_sizes=(1, 1, 1),
+                 dropout=0.4):
         super().__init__()
         self.convs = nn.ModuleList([
                                     nn.Conv1d(in_channels=input_size,
@@ -18,7 +18,7 @@ class CNN(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, text):
-        embedded = text.unsqueeze(2).expand(-1, -1, 4)
+        embedded = text.unsqueeze(2)
         conved = [F.leaky_relu(conv(embedded)) for conv in self.convs]
         pooled = [F.avg_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
 
