@@ -1,13 +1,13 @@
-import pickle
+import pickle5 as pickle
 
-from src.preprocessing.Preprocessing import correction, preprocess, remove_redundent_characters
+from src.model.Cnn import CNN2d1, CNN2d
+from src.model.Gcnn import GCNN
+from src.preprocessing.Preprocessing import preprocess, remove_redundent_characters
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
 from torch.utils.data import TensorDataset
 from src.model.Lr import LinearRegression
 from src.params import device, emb_model
 from torch.utils.data import DataLoader
-from skorch import NeuralNetClassifier
 from src.metrics import ir_metrics
 from src.model import LSTM, CNN
 from src.running.Run import run
@@ -67,7 +67,7 @@ def main(args):
         return 0
     loading = True
     if not loading:
-        df = pd.read_excel(args.train_path)
+        df = pd.read_excel(args.train_path).sample(n=2000)
         # negative_data = df[df['sentiment'] == 'sad']
         # neutral_data = df[df['sentiment'] == 'meh']
         # positive_data = df[df['sentiment'] == 'happy']
@@ -91,10 +91,10 @@ def main(args):
         X_eval, y_eval = preparation(eval_df, augment=False)
         X_test, y_test = preparation(test_df, augment=False)
         data_pickle = [X_train, y_train, X_eval, y_eval, X_test, y_test]
-        with open('roberta.pkl', 'wb') as f:
+        with open('sample_normal.pkl', 'wb') as f:
             pickle.dump(data_pickle, f, protocol=pickle.HIGHEST_PROTOCOL)
     else:
-        data_pickle = pickle.load(open('roberta.pkl', 'rb'))
+        data_pickle = pickle.load(open('unbiased_total.pkl', 'rb'))
         X_train, y_train, X_eval, y_eval, X_test, y_test = data_pickle
 
     inputs = torch.from_numpy(np.array(X_train)).to(device)
@@ -129,7 +129,7 @@ def main(args):
         model = LSTM(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
 
     elif args.model_name == 'cnn':
-        model = CNN(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
+        model = GCNN(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
 
     elif args.model_name == 'lr':
         model = LinearRegression(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
@@ -157,11 +157,11 @@ if __name__ == '__main__':
                         help='Raw dataset file address.')
     parser.add_argument('--augment', dest='augment', type=bool, default=True,
                         help='augment the dataset to learn better.')
-    parser.add_argument('--model_name', dest='model_name', type=str, default='lstm',
+    parser.add_argument('--model_name', dest='model_name', type=str, default='cnn',
                         help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=500,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=200,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.xlsx',
                         help="address to test dataset.")
