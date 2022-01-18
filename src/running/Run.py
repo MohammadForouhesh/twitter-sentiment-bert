@@ -1,7 +1,7 @@
 from src.metrics.Metrics import time_per_epoch
 from src.running.Evaluation import evaluate
 from src.running.Train import train
-from src.params import N_EPOCH
+from src.params import EPOCHS
 import torch
 import time
 import tqdm
@@ -9,12 +9,12 @@ import tqdm
 best_validation_loss = float('inf')
 
 
-def run(model, train_iterator, eval_iterator, optimizer, loss_function, n_epoch):
+def run(model, train_iterator, eval_iterator, optimizer, loss_function, n_epoch, scheduler):
     global best_validation_loss
     start_time = time.time()
     early_stop = False
     for epoch in tqdm.tqdm(range(n_epoch)):
-        train_loss, train_acc = train(model, train_iterator, optimizer, criterion=loss_function)
+        train_loss, train_acc = train(model, train_iterator, optimizer, criterion=loss_function, scheduler=scheduler)
         
         valid_loss, valid_acc = evaluate(model, eval_iterator, criterion=loss_function)
 
