@@ -1,9 +1,21 @@
 from sentence_transformers import SentenceTransformer
 import torch
 
-N_EPOCH = 10
-print(torch.__version__)
-emb_model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2') #'distilbert-base-multilingual-cased') #
+print('torch version:\t', torch.__version__)
+
+EPOCHS   = 10
+PATH_PKL = 'unbiased_sample.pkl'
+MAX_LEN  = 280
+LEARNING_RATE = 1e-4
+TRAIN_BATCH_SIZE = 128
+VALID_BATCH_SIZE = 128
+TEST_BATCH_SIZE  = 128
+LABEL_LIST       = ['sad', 'meh', 'happy']
+MODEL_NAME_OR_PATH = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+
+id2label = {0: 'sad', 1: 'meh', 2: 'happy'}
+label2id = {'sad': 0, 'meh': 1, 'happy': 2}
+
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print('Using {} device'.format(device))
 
@@ -11,20 +23,3 @@ file = open('persian.txt', 'r', encoding="utf8")
 sw_persian = list(file.read().splitlines())
 
 best_validation_loss = float('inf')
-
-"""
-tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased")
-
-
-training_args = TrainingArguments(
-    output_dir='./results',          # output directory
-    num_train_epochs=3,              # total number of training epochs
-    per_device_train_batch_size=16,  # batch size per device during training
-    per_device_eval_batch_size=64,   # batch size for evaluation
-    warmup_steps=500,                # number of warmup steps for learning rate scheduler
-    weight_decay=0.01,               # strength of weight decay
-    logging_dir='./logs',            # directory for storing logs
-    logging_steps=10,
-)
-"""
