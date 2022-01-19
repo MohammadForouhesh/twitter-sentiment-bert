@@ -9,11 +9,16 @@ def ir_metrics(model, iterator):
     acc = Accuracy()
     
     # Start accumulation:
-    for seq, label in iterator:
-        y_pred = model(seq)
-        precision.update((y_pred, label))
-        recall.update((y_pred, label))
-        acc.update((y_pred, label))
+    for dl in iterator:
+        input_ids      = dl['input_ids']
+        attention_mask = dl['attention_mask']
+        token_type_ids = dl['token_type_ids']
+        targets        = dl['targets']
+
+        y_pred = model(input_ids, attention_mask, token_type_ids)
+        precision.update((y_pred, targets))
+        recall.update((y_pred, targets))
+        acc.update((y_pred, targets))
     
     print("Precision: ", precision.compute(), '\n', precision.compute().mean(), '\n')
     print("Recall: ", recall.compute(), '\n', recall.compute().mean(), '\n')
@@ -23,7 +28,7 @@ def ir_metrics(model, iterator):
 def categorical_acc(preds, label):
     max_preds = preds.argmax(dim=1, keepdim=True)
     correct = max_preds.squeeze(1).eq(label)
-    return correct.sum() / torch.FloatTensor([label.shape[0]])
+    return correct.sum() / torch.cuda.FloatTensor([label.shape[0]])
 
 
 def time_per_epoch(st, et):
