@@ -27,7 +27,8 @@ class TweetsDataset(torch.utils.data.Dataset):
         encoding = self.tokenizer(tweet, add_special_tokens=True, truncation=True,
                                   max_length=self.max_len, return_token_type_ids=True, padding='max_length',
                                   return_attention_mask=True, return_tensors='pt')
-        inputs = {'tweet': tweet, 'input_ids': encoding['input_ids'].flatten().to(self.device),
+        inputs = {'tweet': tweet,
+                  'input_ids': encoding['input_ids'].flatten().to(self.device),
                   'attention_mask': encoding['attention_mask'].flatten().to(self.device),
                   'token_type_ids': encoding['token_type_ids'].flatten().to(self.device)}
 
@@ -37,6 +38,7 @@ class TweetsDataset(torch.utils.data.Dataset):
         return inputs
 
 
-def create_data_loader(tokenizer, tweets, targets, max_len, label_list, batch_size):
-    dataset = TweetsDataset(tokenizer=tokenizer, tweets=tweets, targets=targets, max_len=max_len, label_list=label_list)
-    return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True, pin_memory=True)
+def create_data_loader(tokenizer, tweets, targets, max_len, label_list, batch_size, device):
+    dataset = TweetsDataset(tokenizer=tokenizer, tweets=tweets, targets=targets, max_len=max_len, label_list=label_list,
+                            device=device)
+    return torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
