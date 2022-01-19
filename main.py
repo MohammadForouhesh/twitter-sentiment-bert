@@ -56,16 +56,14 @@ def inference(model, tokenizer, sentence):
 
 def main(args):
     args.load = True
-    df = pd.read_excel(args.train_path).sample(n=2000)
-    df = df_normalizer(df)
+    df = pd.read_excel(args.train_path)
+    # df = df_normalizer(df)
     train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
     train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
 
     X_train, y_train = preparation(train_df)
     X_eval, y_eval = preparation(eval_df)
     X_test, y_test = preparation(test_df)
-
-    print(X_train[0][::-1])
 
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME_OR_PATH)
     embedding = AutoModel.from_pretrained(MODEL_NAME_OR_PATH)
@@ -76,11 +74,11 @@ def main(args):
         })
 
     train_dl = create_data_loader(tokenizer=tokenizer, tweets=X_train, targets=y_train, label_list=LABEL_LIST,
-                                  max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE)
+                                  max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE, device=device)
     eval_dl  = create_data_loader(tokenizer=tokenizer, tweets=X_eval, targets=y_eval, label_list=LABEL_LIST,
-                                  max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE)
+                                  max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE, device=device)
     test_dl  = create_data_loader(tokenizer=tokenizer, tweets=X_test, targets=y_test, label_list=LABEL_LIST,
-                                  max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE)
+                                  max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE, device=device)
     #
     # if args.save:
     #     data_pickle = [train_dl, eval_dl, test_dl]
