@@ -3,7 +3,7 @@ import torch
 
 print('torch version:\t', torch.__version__)
 
-EPOCHS   = 10
+EPOCHS   = 50
 PATH_PKL = 'unbiased_sample.pkl'
 MAX_LEN  = 280
 LEARNING_RATE = 1e-4
