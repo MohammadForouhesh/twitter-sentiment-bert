@@ -159,6 +159,6 @@ if __name__ == '__main__':
                             level=logging.INFO)
         warnings.filterwarnings("ignore")
         print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
-              colored('\n===============NEURAL=ARCH===============', 'red'))
+              colored('\n============TWITTER=SENTIMENT============', 'red'))
         main(args)
         print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'))
