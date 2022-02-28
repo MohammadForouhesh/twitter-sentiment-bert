@@ -137,7 +137,7 @@ def df_normalizer(df):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Neural Architectures')
+    parser = argparse.ArgumentParser(description='twitter-sentiment-bert')
     parser.add_argument('--train_path', dest='train_path', type=str, default='dataset/sentiment-multilingual-approach.xlsx',
                         help='Raw dataset file address.')
     parser.add_argument('--augment', dest='augment', type=bool, default=True,
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     with warnings.catch_warnings():
-        logging.basicConfig(filename='neural-arch.log', format='%(asctime)s : %(levelname)s : %(message)s',
+        logging.basicConfig(filename='twitter-sentiment-bert.log', format='%(asctime)s : %(levelname)s : %(message)s',
                             level=logging.INFO)
         warnings.filterwarnings("ignore")
         print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
