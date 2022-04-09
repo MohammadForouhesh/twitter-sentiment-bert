@@ -15,3 +15,5 @@ dataset/.DS_Store
 *.pt
 *.pkl
 *.pyc
+*.xml
+.idea/*
