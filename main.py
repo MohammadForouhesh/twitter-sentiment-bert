@@ -55,7 +55,6 @@ def inference(model, tokenizer, sentence):
 
 
 def main(args):
-    args.load = True
     df = pd.read_excel(args.train_path)
     # df = df_normalizer(df)
     train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
@@ -79,21 +78,10 @@ def main(args):
                                   max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE, device=device)
     test_dl  = create_data_loader(tokenizer=tokenizer, tweets=X_test, targets=y_test, label_list=LABEL_LIST,
                                   max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE, device=device)
-    #
-    # if args.save:
-    #     data_pickle = [train_dl, eval_dl, test_dl]
-    #     with open(PATH_PKL, 'wb') as f:
-    #         pickle.dump(data_pickle, f, protocol=pickle.HIGHEST_PROTOCOL)
-    # else:
-    #     data_pickle = pickle.load(open(PATH_PKL, 'rb'))
-    #     train_dl, eval_dl, test_dl = data_pickle
 
     print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
           colored('\n===============TRAIN=' + args.model_name.upper() + '===============', 'red'))
-    if args.model_name   == 'lstm': model = LSTM(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
-    elif args.model_name == 'cnn':  model = GCNN(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
-    elif args.model_name == 'lr':   model = LinearRegression(input_size=len(X_train[0]), output_size=len(set(y_train))).to(device)
-    else:                           model = SentimentModel(embedding, config).to(device)
+    model = SentimentModel(embedding, config).to(device)
 
     loss_function = nn.CrossEntropyLoss()
     loss_function = loss_function.to(device)
@@ -113,11 +101,6 @@ def main(args):
           colored('\n===============Test==' + args.model_name.upper() + '===============', 'red'))
 
     ir_metrics(model=trained_model, iterator=test_dl)
-    """
-    inference_set = pd.read_csv(args.test_path)
-    inference_set['sentiment'] = inference_set.text.apply(lambda item: inference_model(trained_model, item))
-    inference_set.to_csv('datasets_sentiment_lstm.csv')
-    """
 
 
 def df_normalizer(df):
@@ -142,11 +125,9 @@ if __name__ == '__main__':
                         help='Raw dataset file address.')
     parser.add_argument('--augment', dest='augment', type=bool, default=True,
                         help='augment the dataset to learn better.')
-    parser.add_argument('--model_name', dest='model_name', type=str, default='sentiment',
-                        help="supported models in this implementation are CNN and LSTM.")
     parser.add_argument('--preprocess', dest='preprocess', type=bool, default=True,
                         help="whether or not preprocessing the training set.")
-    parser.add_argument('--epoch', dest='epoch', type=int, default=200,
+    parser.add_argument('--epoch', dest='epoch', type=int, default=15,
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.xlsx',
                         help="address to test dataset.")
