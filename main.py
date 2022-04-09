@@ -86,14 +86,14 @@ def main(args):
     loss_function = nn.CrossEntropyLoss()
     loss_function = loss_function.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True, lr=LEARNING_RATE)
-    total_steps = len(train_dl) * EPOCHS
+    total_steps = len(train_dl) * args.epoch
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
         num_warmup_steps=0,
         num_training_steps=total_steps
     )
     trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
-                        scheduler=scheduler, loss_function=loss_function, n_epoch=EPOCHS)
+                        scheduler=scheduler, loss_function=loss_function, n_epoch=args.epoch)
 
     ir_metrics(model=trained_model, iterator=train_dl)
 
