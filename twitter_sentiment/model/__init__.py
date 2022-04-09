@@ -1,2 +1,2 @@
-from src.model.Cnn import CNN
-from src.model.Lstm import LSTM
+from twitter_sentiment.model.Cnn import CNN
+from twitter_sentiment.model.Lstm import LSTM
