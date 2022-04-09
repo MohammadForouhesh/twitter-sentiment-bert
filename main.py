@@ -1,19 +1,19 @@
 from transformers import AutoTokenizer, AutoModel, AutoConfig, get_linear_schedule_with_warmup
 
-from src.model.Cnn import CNN2d1, CNN2d
-from src.model.Gcnn import GCNN
-from src.model.Sentiment import SentimentModel
-from src.params import MAX_LEN, PATH_PKL, TRAIN_BATCH_SIZE, LABEL_LIST, id2label, device, MODEL_NAME_OR_PATH, label2id, \
+from twitter_sentiment.model.Cnn import CNN2d1, CNN2d
+from twitter_sentiment.model.Gcnn import GCNN
+from twitter_sentiment.model.Sentiment import SentimentModel
+from twitter_sentiment.params import MAX_LEN, PATH_PKL, TRAIN_BATCH_SIZE, LABEL_LIST, id2label, device, MODEL_NAME_OR_PATH, label2id, \
     EPOCHS, LEARNING_RATE
-from src.preprocessing.Dataset import create_data_loader
-from src.preprocessing.Preprocessing import preprocess, remove_redundent_characters
+from twitter_sentiment.preprocessing.Dataset import create_data_loader
+from twitter_sentiment.preprocessing.Preprocessing import preprocess, remove_redundent_characters
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset
-from src.model.Lr import LinearRegression
+from twitter_sentiment.model.Lr import LinearRegression
 from torch.utils.data import DataLoader
-from src.metrics import ir_metrics
-from src.model import LSTM, CNN
-from src.running.Run import run
+from twitter_sentiment.metrics import ir_metrics
+from twitter_sentiment.model import LSTM, CNN
+from twitter_sentiment.running.Run import run
 from termcolor import colored
 from datetime import datetime
 from tqdm import tqdm
