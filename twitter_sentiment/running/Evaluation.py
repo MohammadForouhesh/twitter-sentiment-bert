@@ -1,4 +1,4 @@
-from src.metrics.Metrics import categorical_acc
+from twitter_sentiment.metrics.Metrics import categorical_acc
 import torch
 
 
