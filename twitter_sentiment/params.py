@@ -9,7 +9,7 @@ TRAIN_BATCH_SIZE = 128
 VALID_BATCH_SIZE = 128
 TEST_BATCH_SIZE  = 128
 LABEL_LIST       = ['sad', 'meh', 'happy']
-MODEL_NAME_OR_PATH = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+MODEL_NAME_OR_PATH = 'HooshvareLab/albert-fa-zwnj-base-v2'
 
 id2label = {0: 'sad', 1: 'meh', 2: 'happy'}
 label2id = {'sad': 0, 'meh': 1, 'happy': 2}
