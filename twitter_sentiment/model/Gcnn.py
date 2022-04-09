@@ -2,8 +2,8 @@ from torch import nn
 import torch.nn
 import torch
 
-from src.model import LSTM, CNN
-from src.model.Cnn import CNN2d
+from twitter_sentiment.model import LSTM, CNN
+from twitter_sentiment.model.Cnn import CNN2d
 
 
 class GCNN(nn.Module):
