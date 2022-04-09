@@ -46,7 +46,7 @@ def inference(model, tokenizer, sentence):
 
 
 def main(args):
-    df = pd.read_excel(args.train_path).sample(500)
+    df = pd.read_excel(args.train_path).sample(50)
     # df = df_normalizer(df)
     train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
     train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
