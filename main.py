@@ -3,7 +3,7 @@ from transformers import AutoTokenizer, AutoModel, AutoConfig, get_linear_schedu
 from twitter_sentiment.model.Cnn import CNN2d1, CNN2d
 from twitter_sentiment.model.Gcnn import GCNN
 from twitter_sentiment.model.Sentiment import SentimentModel
-from twitter_sentiment.params import MAX_LEN, PATH_PKL, TRAIN_BATCH_SIZE, LABEL_LIST, id2label, device, MODEL_NAME_OR_PATH, label2id, \
+from twitter_sentiment.params import MAX_LEN, TRAIN_BATCH_SIZE, LABEL_LIST, id2label, device, MODEL_NAME_OR_PATH, label2id, \
     EPOCHS, LEARNING_RATE
 from twitter_sentiment.preprocessing.Dataset import create_data_loader
 from twitter_sentiment.preprocessing.Preprocessing import preprocess, remove_redundent_characters
