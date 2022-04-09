@@ -1,4 +1,4 @@
-from src.params import device
+from twitter_sentiment.params import device
 from torch import nn
 import torch.nn
 
