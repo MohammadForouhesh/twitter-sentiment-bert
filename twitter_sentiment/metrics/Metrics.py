@@ -1,6 +1,5 @@
 from ignite.metrics import Precision, Recall, Accuracy
 import torch
-import time
 
 
 def ir_metrics(model, iterator):
