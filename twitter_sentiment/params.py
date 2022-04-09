@@ -4,9 +4,9 @@ print('torch version:\t', torch.__version__)
 
 MAX_LEN  = 280
 LEARNING_RATE = 1e-4
-TRAIN_BATCH_SIZE = 128
-VALID_BATCH_SIZE = 128
-TEST_BATCH_SIZE  = 128
+TRAIN_BATCH_SIZE = 16
+VALID_BATCH_SIZE = 16
+TEST_BATCH_SIZE  = 16
 LABEL_LIST       = ['sad', 'meh', 'happy']
 MODEL_NAME_OR_PATH = 'HooshvareLab/albert-fa-zwnj-base-v2'
 
