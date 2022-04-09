@@ -1,7 +1,6 @@
-from src.metrics.Metrics import time_per_epoch
-from src.running.Evaluation import evaluate
-from src.running.Train import train
-from src.params import EPOCHS
+from twitter_sentiment.metrics.Metrics import time_per_epoch
+from twitter_sentiment.running.Evaluation import evaluate
+from twitter_sentiment.running.Train import train
 import torch
 import time
 import tqdm
@@ -20,7 +19,7 @@ def run(model, train_iterator, eval_iterator, optimizer, loss_function, n_epoch,
 
         if valid_loss < best_validation_loss:
             best_validation_loss = valid_loss
-            torch.save(model.state_dict(), f'models/sentiment_{model.__class__.__name__}.pt')
+            torch.save(model.state_dict(), f'resources/sentiment_{model.__class__.__name__}.pt')
         if valid_acc > 0.8 and train_acc > 0.9: early_stop = True
         if (epoch + 1) % 10 != 0 and not early_stop: continue
 
