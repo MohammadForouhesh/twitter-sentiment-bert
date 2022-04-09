@@ -1,5 +1,4 @@
 from twitter_sentiment.metrics.Metrics import categorical_acc
-from twitter_sentiment.params import device
 import torch
 
 
