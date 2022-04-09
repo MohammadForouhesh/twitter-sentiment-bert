@@ -1,4 +1,4 @@
-from src.params import sw_persian
+from twitter_sentiment.params import sw_persian
 import pandas as pd
 import re
 
