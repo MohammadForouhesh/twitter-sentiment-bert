@@ -1,5 +1,5 @@
-from src.metrics.Metrics import categorical_acc
-from src.params import device
+from twitter_sentiment.metrics.Metrics import categorical_acc
+from twitter_sentiment.params import device
 import torch
 
 
