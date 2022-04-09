@@ -1,4 +1,3 @@
-from sentence_transformers import SentenceTransformer
 import torch
 
 print('torch version:\t', torch.__version__)
