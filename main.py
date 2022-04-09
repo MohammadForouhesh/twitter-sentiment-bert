@@ -4,7 +4,7 @@ from twitter_sentiment.model.Cnn import CNN2d1, CNN2d
 from twitter_sentiment.model.Gcnn import GCNN
 from twitter_sentiment.model.Sentiment import SentimentModel
 from twitter_sentiment.params import MAX_LEN, TRAIN_BATCH_SIZE, LABEL_LIST, id2label, device, MODEL_NAME_OR_PATH, label2id, \
-    EPOCHS, LEARNING_RATE
+    LEARNING_RATE
 from twitter_sentiment.preprocessing.Dataset import create_data_loader
 from twitter_sentiment.preprocessing.Preprocessing import preprocess, remove_redundent_characters
 from sklearn.model_selection import train_test_split
@@ -55,7 +55,7 @@ def inference(model, tokenizer, sentence):
 
 
 def main(args):
-    df = pd.read_excel(args.train_path)
+    df = pd.read_excel(args.train_path).sample(500)
     # df = df_normalizer(df)
     train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
     train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
@@ -80,7 +80,7 @@ def main(args):
                                   max_len=MAX_LEN, batch_size=TRAIN_BATCH_SIZE, device=device)
 
     print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
-          colored('\n===============TRAIN=' + args.model_name.upper() + '===============', 'red'))
+          colored('\n===============TRAIN=ParsAlbert ===============', 'red'))
     model = SentimentModel(embedding, config).to(device)
 
     loss_function = nn.CrossEntropyLoss()
@@ -98,7 +98,7 @@ def main(args):
     ir_metrics(model=trained_model, iterator=train_dl)
 
     print(colored('[' + str(datetime.now().hour) + ':' + str(datetime.now().minute) + ']', 'cyan'),
-          colored('\n===============Test==' + args.model_name.upper() + '===============', 'red'))
+          colored('\n===============Test==ParsAlbert===============', 'red'))
 
     ir_metrics(model=trained_model, iterator=test_dl)
 
