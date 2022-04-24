@@ -5,11 +5,11 @@ print('torch version:\t', torch.__version__)
 
 MAX_LEN  = 280
 LEARNING_RATE = 1e-4
-TRAIN_BATCH_SIZE = 16
-VALID_BATCH_SIZE = 16
-TEST_BATCH_SIZE  = 16
+TRAIN_BATCH_SIZE = 1
+VALID_BATCH_SIZE = 1
+TEST_BATCH_SIZE  = 1
 LABEL_LIST       = ['sad', 'meh', 'happy']
-MODEL_NAME_OR_PATH = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+MODEL_NAME_OR_PATH = 'HooshvareLab/roberta-fa-zwnj-base'
 
 id2label = {0: 'sad', 1: 'meh', 2: 'happy'}
 label2id = {'sad': 0, 'meh': 1, 'happy': 2}

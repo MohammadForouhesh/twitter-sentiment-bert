@@ -1,1 +1,1 @@
-from src.preprocessing.Preprocessing import preprocess
+from twitter_sentiment.preprocessing.Preprocessing import preprocess

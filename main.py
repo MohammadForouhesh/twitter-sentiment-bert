@@ -4,7 +4,7 @@ from twitter_sentiment.model.Cnn import CNN2d1, CNN2d
 from twitter_sentiment.model.Gcnn import GCNN
 from twitter_sentiment.model.Sentiment import SentimentModel
 from twitter_sentiment.params import MAX_LEN, TRAIN_BATCH_SIZE, LABEL_LIST, id2label, device, MODEL_NAME_OR_PATH, label2id, \
-    EPOCHS, LEARNING_RATE
+    LEARNING_RATE
 from twitter_sentiment.preprocessing.Dataset import create_data_loader
 from twitter_sentiment.preprocessing.Preprocessing import preprocess, remove_redundent_characters
 from sklearn.model_selection import train_test_split
@@ -44,7 +44,7 @@ def preparation(dataframe) -> (np.ndarray, np.ndarray):
     dataframe.replace('', float('NaN'))
     dataframe.dropna(inplace=True)
     text = dataframe.text
-    label = dataframe.sentiment
+    label = dataframe.label
     return list(text), list(label)
 
 
@@ -55,10 +55,12 @@ def inference(model, tokenizer, sentence):
 
 
 def main(args):
-    df = pd.read_excel(args.train_path)
-    # df = df_normalizer(df)
-    train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.sentiment))
-    train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.sentiment))
+    df = pd.read_csv(args.train_path)
+    df = df_normalizer(df)
+    df = df.sample(2000)
+    df.to_excel('fine_tuned_dataset.xlsx')
+    train_df, test_df = train_test_split(df, test_size=0.15, stratify=list(df.label))
+    train_df, eval_df = train_test_split(train_df, test_size=0.1, stratify=list(train_df.label))
 
     X_train, y_train = preparation(train_df)
     X_eval, y_eval = preparation(eval_df)
@@ -86,14 +88,14 @@ def main(args):
     loss_function = nn.CrossEntropyLoss()
     loss_function = loss_function.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), amsgrad=True, lr=LEARNING_RATE)
-    total_steps = len(train_dl) * EPOCHS
+    total_steps = len(train_dl) * args.epoch
     scheduler = get_linear_schedule_with_warmup(
         optimizer,
         num_warmup_steps=0,
         num_training_steps=total_steps
     )
     trained_model = run(model=model, train_iterator=train_dl, eval_iterator=eval_dl, optimizer=optimizer,
-                        scheduler=scheduler, loss_function=loss_function, n_epoch=EPOCHS)
+                        scheduler=scheduler, loss_function=loss_function, n_epoch=args.epoch)
 
     ir_metrics(model=trained_model, iterator=train_dl)
 
@@ -104,9 +106,9 @@ def main(args):
 
 
 def df_normalizer(df):
-    negative_data = df[df['sentiment'] == 'sad']
-    neutral_data = df[df['sentiment'] == 'meh']
-    positive_data = df[df['sentiment'] == 'happy']
+    negative_data = df[df['label'] == 'sad']
+    neutral_data = df[df['label'] == 'meh']
+    positive_data = df[df['label'] == 'happy']
     cutting_point = min(len(negative_data), len(neutral_data), len(positive_data))
     print(cutting_point)
     if cutting_point <= len(negative_data):
@@ -121,7 +123,7 @@ def df_normalizer(df):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='twitter-sentiment-bert')
-    parser.add_argument('--train_path', dest='train_path', type=str, default='dataset/sentiment-multilingual-approach.xlsx',
+    parser.add_argument('--train_path', dest='train_path', type=str, default='large-sentiment-resource.csv',
                         help='Raw dataset file address.')
     parser.add_argument('--augment', dest='augment', type=bool, default=True,
                         help='augment the dataset to learn better.')
@@ -131,6 +133,7 @@ if __name__ == '__main__':
                         help="number of epochs in the training")
     parser.add_argument('--test_path', dest='test_path', type=str, default='dataset/datasets.xlsx',
                         help="address to test dataset.")
+    parser.add_argument('--model_name', dest='model_name', type=str, default='sentiment')
     parser.add_argument('--load', dest='load', type=bool, default=True)#'models/sentiment_LSTM.pt')
 
     args = parser.parse_args()
